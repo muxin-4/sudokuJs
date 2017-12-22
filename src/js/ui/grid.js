@@ -2,7 +2,8 @@
  * 生成九宫格
  */
 
- const Toolkit = require("../core/toolkit");
+const Toolkit = require("../core/toolkit");
+const Sudoku = require("../core/sudoku");
 
 class Grid {
   constructor(container) {
@@ -10,7 +11,14 @@ class Grid {
   }
 
   build() {
-    const matrix = Toolkit.matrix.makeMatrix();
+
+    const sudoku = new Sudoku();
+    sudoku.make();
+    const matrix = sudoku.puzzleMatrix;
+
+    // const generator = new Generator();
+    // generator.generate();
+    // const matrix = generator.matrix;
 
     const rowGroupClasses = ["row_g_top", "row_g_middle", "row_g_bottom"];
     const colGroupClasses = ["col_g_left", "col_g_center", "col_g_right"];
@@ -20,8 +28,9 @@ class Grid {
 
         return $("<span>")
           .addClass(colGroupClasses[colIndex % 3])
+          .addClass(cellValue ? "fixed" : "empty")
           .text(cellValue);
-    }));
+      }));
 
     const $divArray = $cells
       .map(($spanArray, rowIndex) => {
@@ -30,7 +39,7 @@ class Grid {
           .addClass("row")
           .addClass(rowGroupClasses[rowIndex % 3])
           .append($spanArray);
-    });
+      });
 
     this._$container.append($divArray);
   }
@@ -41,8 +50,8 @@ class Grid {
     $("span", this._$container)
       .height(width)
       .css({
-        "line-height": '${width}px',
-        "font-size": width < 32 ? '${width /2}px' : ""
+        "line-height": `${width}px`,
+        "font-size": width < 32 ? `${width /2}px` : ""
       })
   }
 }
