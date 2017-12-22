@@ -1,3 +1,7 @@
+/**
+ * 矩阵和数组相关工具
+ */
+
 const matrixToolkit = {
 
   makeRow(v = 0) {
@@ -12,6 +16,7 @@ const matrixToolkit = {
 
   /**
    * Fisher-Yates 洗牌算法
+   * 对传入数组进行随机排序，然后把这个数组返回出来
    * @param {any} array
    */
 
@@ -25,4 +30,28 @@ const matrixToolkit = {
   }
 };
 
-module.exports = matrixToolkit;
+/**
+ * 宫坐标系工具
+ */
+const boxToolit = {
+
+};
+
+// 工具集
+module.exports = class Toolkit {
+
+  /**
+   * 矩阵和数组相关工具
+   */
+
+  static get matrix() {
+    return matrixToolkit;
+  }
+
+  /**
+   * 宫坐标系工具
+   */
+  static get box() {
+    return boxToolit;
+  }
+};
