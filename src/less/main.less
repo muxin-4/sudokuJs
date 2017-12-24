@@ -70,6 +70,27 @@ body {
       &.empty {
         color: #fff;
       }
+
+      &.error {
+        background-color: lightpink;
+        &.empty {
+          color: lightpink;
+        }
+      }
+
+      &.mark1 {
+        background: lightblue;
+        &.empty {
+          color: lightblue;
+        }
+      }
+
+      &.mark2 {
+        background: lightgreen;
+        &.empty {
+          color: lightgreen;
+        }
+      }
     }
 
     &.row_g_bottom {
@@ -91,6 +112,28 @@ body {
 
 
 
+  }
+}
+
+@popupCellSize: 40px;
+.popup_num {
+  .container();
+  position: absolute;
+  padding-left: 0;
+
+  .row {
+    /**
+     * 解决两个相邻的span中间有空隙
+     */
+    font-size: 0;
+    -webkit-text-size-adjust: none;
+
+    >span {
+      font-size: 14px;
+      width: @popupCellSize;
+      height: @popupCellSize;
+      line-height: @popupCellSize;
+    }
   }
 }
 

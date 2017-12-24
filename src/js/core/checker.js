@@ -7,7 +7,7 @@ function checkArray(array) {
   const marks = new Array(length);
   marks.fill(true);
 
-  for (let i = 0; i < length - 1; i++) {
+  for (let i = 0; i < length; i++) {
     const v = array[i];
     // 是否有效： 0 - 无效， 1-9 有效
     if (!v) {
@@ -15,7 +15,7 @@ function checkArray(array) {
       continue;
     }
     // 是否有重复： i+1 ~ 9，是否和 i 位置的数据重复
-    for (let j = i + 1; j < length; j++) {
+    for (let j = i + 1; j < length - 1; j++) {
       if (v === array[j]) {
         marks[i] = marks[j] = false;
       }
@@ -32,7 +32,7 @@ const Toolkit = require("./toolkit");
  * 处理： 对matrix 行、列、宫进行检查，并填写marks
  * 输出： 检查是否成功、marks
  */
-class Checker {
+module.exports = class Checker {
   constructor(matrix) {
     this._matrix = matrix;
     this._matrixMarks = Toolkit.matrix.makeMatrix(true);
@@ -88,7 +88,7 @@ class Checker {
   checkBoxes() {
     for (let boxIndex = 0; boxIndex < 9; boxIndex++) {
       // console.log(boxIndex);
-      const boxes = Toolkit.box.getBoxCells(matrix, boxIndex);
+      const boxes = Toolkit.box.getBoxCells(this._matrix, boxIndex);
       // console.log('boxes' + boxes);
       const marks = checkArray(boxes);
 

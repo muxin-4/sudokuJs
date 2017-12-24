@@ -45,14 +45,33 @@
 /***/ (function(module, exports, __webpack_require__) {
 
 	const Grid = __webpack_require__(1);
-	
+	const PopupNumbers = __webpack_require__(6);
 	
 	
 	const grid = new Grid($("#container"));
 	grid.build();
 	grid.layout();
 	
+	const popupNumbers = new PopupNumbers($("#popupNumbers"));
+	grid.bindPopup(popupNumbers);
 	
+	$("#check").on("click", e => {
+	  if (grid.check()) {
+	    alert("成功");
+	  }
+	});
+	
+	$("#reset").on("click", e => {
+	  grid.reset();
+	});
+	
+	$("#clear").on("click", e => {
+	  grid.clear();
+	});
+	
+	$("#rebuild").on("click", e => {
+	  grid.rebuild();
+	});
 
 
 /***/ }),
@@ -65,6 +84,7 @@
 	
 	const Toolkit = __webpack_require__(2);
 	const Sudoku = __webpack_require__(3);
+	const Checker = __webpack_require__(5);
 	
 	class Grid {
 	  constructor(container) {
@@ -105,16 +125,90 @@
 	    this._$container.append($divArray);
 	  }
 	
-	
 	  layout() {
 	    const width = $("span:first", this._$container).width();
 	    $("span", this._$container)
 	      .height(width)
 	      .css({
 	        "line-height": `${width}px`,
-	        "font-size": width < 32 ? `${width /2}px` : ""
+	        "font-size": width < 32 ? `${width / 2}px` : ""
 	      })
 	  }
+	
+	  bindPopup(popupNumbers) {
+	    this._$container.on("click", "span", e => {
+	      const $cell = $(e.target);
+	      if ($cell.is(".fixed")) {
+	        return;
+	      }
+	
+	      popupNumbers.popup($cell);
+	    });
+	  }
+	  /**
+	   * 检查用户解谜的结果，成功则进行提示，失败显示错误位置的标记
+	   */
+	  check() {
+	    // 从界面获取需要检查的数据
+	    const $rows = this._$container.children();
+	    const data = $rows
+	          .map((rowIndex, div) => {
+	            return $(div).children()
+	                  .map((colIndex, span) => parseInt($(span).text()) || 0);
+	          })
+	          .toArray()
+	          .map($data => $data.toArray());
+	
+	    const checker = new Checker(data);
+	    if (checker.check()) {
+	      return true;
+	    }
+	
+	    // 检查不成功，标记
+	    const marks = checker.matrixMarks;
+	    this._$container.children()
+	      .each((rowIndex, div) => {
+	        $(div).children().each((colIndex, span) => {
+	          const $span = $(span);
+	          if ($span.is(".fixed") || marks[rowIndex][colIndex]) {
+	            $span.removeClass("error");
+	          }else {
+	            $span.addClass("error");
+	          }
+	        });
+	      });
+	
+	  }
+	  /**
+	   * 重置当前迷盘到初始状态
+	   */
+	  reset() {
+	    this._$container.find("span:not(.fixed)")
+	      .removeClass("error mark1 mark2")
+	      .addClass("empty")
+	      .text(0);
+	  }
+	
+	  /**
+	   * 清除错误标记
+	   *
+	   * @memberof Grid
+	   */
+	  clear() {
+	    this._$container.find("span.error")
+	     .removeClass("error")
+	  }
+	
+	  /**
+	   * 重建新的迷盘，开始新一局
+	   * @memberof Grid
+	   */
+	  rebuild() {
+	    this._$container.empty();
+	    this.build();
+	    this.layout();
+	  }
+	
 	}
 	
 	module.exports = Grid;
@@ -345,6 +439,182 @@
 	}
 	
 	
+
+
+/***/ }),
+/* 5 */
+/***/ (function(module, exports, __webpack_require__) {
+
+	/**
+	 * 检查数据解决方案
+	 */
+	
+	function checkArray(array) {
+	  const length = array.length;
+	  const marks = new Array(length);
+	  marks.fill(true);
+	
+	  for (let i = 0; i < length; i++) {
+	    const v = array[i];
+	    // 是否有效： 0 - 无效， 1-9 有效
+	    if (!v) {
+	      marks[i] = false;
+	      continue;
+	    }
+	    // 是否有重复： i+1 ~ 9，是否和 i 位置的数据重复
+	    for (let j = i + 1; j < length - 1; j++) {
+	      if (v === array[j]) {
+	        marks[i] = marks[j] = false;
+	      }
+	    }
+	  }
+	
+	  return marks;
+	}
+	
+	const Toolkit = __webpack_require__(2);
+	
+	/**
+	 * 输入： matrix,用户完成的数独数据，9 x 9
+	 * 处理： 对matrix 行、列、宫进行检查，并填写marks
+	 * 输出： 检查是否成功、marks
+	 */
+	module.exports = class Checker {
+	  constructor(matrix) {
+	    this._matrix = matrix;
+	    this._matrixMarks = Toolkit.matrix.makeMatrix(true);
+	  }
+	
+	  get matrixMarks() {
+	    return this._matrixMarks;
+	  }
+	
+	  get isSuccess() {
+	    return this._success;
+	  }
+	
+	  check() {
+	    this.checkRows();
+	    this.checkCols();
+	    this.checkBoxes();
+	
+	    // 检查是否成功
+	    this._success = this._matrixMarks.every(row => row.every(mark => mark));
+	    return this._success;
+	  }
+	
+	  checkRows() {
+	    for (let rowIndex = 0; rowIndex < 9; rowIndex++) {
+	      const row = this._matrix[rowIndex];
+	      const marks = checkArray(row);
+	
+	      for (let colIndex = 0; colIndex < marks.length; colIndex++) {
+	        if (!marks[colIndex]) {
+	          this._matrixMarks[rowIndex][colIndex] = false;
+	        }
+	      }
+	    }
+	  }
+	
+	  checkCols() {
+	    for (let colIndex = 0; colIndex < 9; colIndex++) {
+	      const cols = [];
+	      for (let rowIndex = 0; rowIndex < 9; rowIndex++) {
+	        cols[rowIndex] = this._matrix[rowIndex][colIndex];
+	      }
+	
+	      const marks = checkArray(cols);
+	      for (let rowIndex = 0; rowIndex < marks.length; rowIndex++) {
+	        if (!marks[rowIndex]) {
+	          this._matrixMarks[rowIndex][colIndex] = false;
+	        }
+	      }
+	    }
+	  }
+	
+	  checkBoxes() {
+	    for (let boxIndex = 0; boxIndex < 9; boxIndex++) {
+	      // console.log(boxIndex);
+	      const boxes = Toolkit.box.getBoxCells(this._matrix, boxIndex);
+	      // console.log('boxes' + boxes);
+	      const marks = checkArray(boxes);
+	
+	      for (let cellIndex = 0; cellIndex < 9; cellIndex++) {
+	        if (!marks[cellIndex]) {
+	          const { rowIndex, colIndex } =
+	            Toolkit.box.convertFromBoxIndex(boxIndex, cellIndex);
+	          this._matrixMarks[rowIndex][colIndex] = false;
+	        }
+	      }
+	    }
+	  }
+	}
+	
+	
+
+
+/***/ }),
+/* 6 */
+/***/ (function(module, exports) {
+
+	/**
+	 * 处理弹出的操作面板
+	 */
+	
+	module.exports = class PopupNumbers {
+	
+	  constructor($panel) {
+	    this._$panel = $panel.hide().removeClass("hidden");
+	
+	    this._$panel.on("click", "span", e => {
+	      const $cell = this._$targetCell;
+	      const $span = $(e.target);
+	
+	      if ($span.hasClass("mark1")) {
+	        if ($cell.hasClass("mark1")) {
+	          $cell.removeClass("mark1");
+	        } else {
+	          $cell.removeClass("mark2")
+	            .addClass("mark1");
+	        }
+	      }
+	      else if ($span.hasClass("mark2")) {
+	        if ($cell.hasClass("mark2")) {
+	          $cell.removeClass("mark2");
+	        } else {
+	          $cell.removeClass("mark1")
+	            .addClass("mark2");
+	        }
+	      }
+	      else if ($span.hasClass("empty")) {
+	        $cell.text(0)
+	          .addClass("empty");
+	        // 取消数字和mark
+	      } else {
+	        // 1-9,回填数字
+	        $cell.removeClass("empty").
+	          text($span.text());
+	      }
+	
+	      this.hide();
+	    });
+	  }
+	
+	  popup($cell) {
+	    this._$targetCell = $cell;
+	    const { left, top } = $cell.position();
+	    this._$panel
+	      .css({
+	        left: `${left}px`,
+	        top: `${top}px`
+	      })
+	      .show();
+	  }
+	
+	  hide() {
+	    this._$panel.hide();
+	  }
+	};
 
 
 /***/ })

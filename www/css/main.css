@@ -57,6 +57,24 @@ body > * {
 .container .row > span.empty {
   color: #fff;
 }
+.container .row > span.error {
+  background-color: lightpink;
+}
+.container .row > span.error.empty {
+  color: lightpink;
+}
+.container .row > span.mark1 {
+  background: lightblue;
+}
+.container .row > span.mark1.empty {
+  color: lightblue;
+}
+.container .row > span.mark2 {
+  background: lightgreen;
+}
+.container .row > span.mark2.empty {
+  color: lightgreen;
+}
 .container .row.row_g_bottom > span {
   border-bottom-width: 1px;
 }
@@ -65,6 +83,78 @@ body > * {
 }
 .container .row:last-child > span {
   border-bottom-width: 2px;
+}
+.popup_num {
+  padding-left: 5%;
+  position: absolute;
+  padding-left: 0;
+}
+.popup_num .row > span {
+  display: inline-block;
+  cursor: pointer;
+  text-align: center;
+  width: 10%;
+  height: 24px;
+  line-height: 24px;
+  border: 1px solid #ccc;
+  border-right-width: 0;
+  border-bottom-width: 0;
+  background: #fff;
+}
+.popup_num .row > span.col_g_right {
+  border-right-width: 1px;
+}
+.popup_num .row > span:first-child {
+  border-left-width: 2px;
+}
+.popup_num .row > span:last-child {
+  border-right-width: 2px;
+}
+.popup_num .row > span.fixed {
+  background: #eee;
+}
+.popup_num .row > span.empty {
+  color: #fff;
+}
+.popup_num .row > span.error {
+  background-color: lightpink;
+}
+.popup_num .row > span.error.empty {
+  color: lightpink;
+}
+.popup_num .row > span.mark1 {
+  background: lightblue;
+}
+.popup_num .row > span.mark1.empty {
+  color: lightblue;
+}
+.popup_num .row > span.mark2 {
+  background: lightgreen;
+}
+.popup_num .row > span.mark2.empty {
+  color: lightgreen;
+}
+.popup_num .row.row_g_bottom > span {
+  border-bottom-width: 1px;
+}
+.popup_num .row:first-child {
+  border-top-width: 2px;
+}
+.popup_num .row:last-child > span {
+  border-bottom-width: 2px;
+}
+.popup_num .row {
+  /**
+     * 解决两个相邻的span中间有空隙
+     */
+  font-size: 0;
+  -webkit-text-size-adjust: none;
+}
+.popup_num .row > span {
+  font-size: 14px;
+  width: 40px;
+  height: 40px;
+  line-height: 40px;
 }
 .dashboard {
   position: absolute;
